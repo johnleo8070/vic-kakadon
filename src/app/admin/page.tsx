@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
-import { BarChart3, DollarSign, ShoppingBag, Package, TrendingUp, Clock, Users } from "lucide-react";
+import { DollarSign, ShoppingBag, Package, Clock } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
+import AdminShell from "@/components/admin/AdminShell";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -35,9 +35,11 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-      </div>
+      <AdminShell>
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+        </div>
+      </AdminShell>
     );
   }
 
@@ -49,40 +51,8 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-64 bg-dark text-white min-h-screen fixed left-0 top-0">
-          <div className="p-6 border-b border-white/10">
-            <div className="flex flex-col">
-              <Image src="/images/logo.png" alt="Kakadon Logo" width={150} height={50} className="object-contain bg-white/90 p-2 rounded-lg" priority />
-              <p className="text-xs text-gray-400 mt-2">Admin Panel</p>
-            </div>
-          </div>
-          <nav className="p-4 space-y-1">
-            {[
-              { href: "/admin", label: "Dashboard", icon: <BarChart3 className="w-5 h-5" /> },
-              { href: "/admin/orders", label: "Orders", icon: <ShoppingBag className="w-5 h-5" /> },
-              { href: "/admin/products", label: "Products", icon: <Package className="w-5 h-5" /> },
-              { href: "/admin/categories", label: "Categories", icon: <Package className="w-5 h-5" /> },
-              { href: "/admin/admins", label: "Admins", icon: <Users className="w-5 h-5" /> },
-              { href: "/admin/settings", label: "Settings", icon: <Users className="w-5 h-5" /> },
-            ].map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
-              >
-                {item.icon}
-                <span className="text-sm font-medium">{item.label}</span>
-              </Link>
-            ))}
-          </nav>
-        </aside>
-
-        {/* Main Content */}
-        <main className="ml-64 flex-1 p-8">
-          <div className="flex items-center justify-between mb-8">
+    <AdminShell>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl font-bold font-serif text-dark">Dashboard</h1>
               <p className="text-gray-500">Welcome back! Here's what's happening with your store.</p>
@@ -167,8 +137,6 @@ export default function AdminDashboard() {
               </div>
             )}
           </div>
-        </main>
-      </div>
-    </div>
+    </AdminShell>
   );
 }

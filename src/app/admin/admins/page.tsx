@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
-import { Plus, Trash2, KeyRound, X, ShieldCheck, UserPlus } from "lucide-react";
+import { Trash2, KeyRound, X, ShieldCheck, UserPlus } from "lucide-react";
 import { isAdminAuthenticated, getAdminAuth, adminFetch } from "@/lib/adminAuth";
 import { showToast } from "@/components/Toast";
+import AdminShell from "@/components/admin/AdminShell";
 
 interface AdminUser {
   id: number;
@@ -14,15 +14,6 @@ interface AdminUser {
   role: string;
   createdAt: string;
 }
-
-const NAV = [
-  { href: "/admin", label: "Dashboard", icon: "📊" },
-  { href: "/admin/orders", label: "Orders", icon: "📦" },
-  { href: "/admin/products", label: "Products", icon: "🏷️" },
-  { href: "/admin/categories", label: "Categories", icon: "📂" },
-  { href: "/admin/admins", label: "Admins", icon: "👤" },
-  { href: "/admin/settings", label: "Settings", icon: "⚙️" },
-];
 
 export default function AdminUsersPage() {
   const router = useRouter();
@@ -111,27 +102,8 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="flex">
-        <aside className="w-64 bg-dark text-white min-h-screen fixed left-0 top-0">
-          <div className="p-6 border-b border-white/10">
-            <div className="flex flex-col">
-              <Image src="/images/logo.png" alt="Kakadon Logo" width={150} height={50} className="object-contain bg-white/90 p-2 rounded-lg" priority />
-              <p className="text-xs text-gray-400 mt-2">Admin Panel</p>
-            </div>
-          </div>
-          <nav className="p-4 space-y-1">
-            {NAV.map((item) => (
-              <Link key={item.href} href={item.href} className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${item.href === "/admin/admins" ? "bg-white/10 text-white" : "text-gray-300 hover:bg-white/10 hover:text-white"}`}>
-                <span>{item.icon}</span>
-                <span className="text-sm font-medium">{item.label}</span>
-              </Link>
-            ))}
-          </nav>
-        </aside>
-
-        <main className="ml-64 flex-1 p-8">
-          <div className="flex items-center justify-between mb-6">
+    <AdminShell>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
               <h1 className="text-2xl font-bold font-serif text-dark flex items-center gap-2">
                 <ShieldCheck className="w-6 h-6 text-primary" /> Admin Accounts
@@ -196,8 +168,6 @@ export default function AdminUsersPage() {
           <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-700">
             <strong>Tip:</strong> New admins sign in at <span className="font-mono">/admin/login</span> using the username/email and password you set here. The last remaining admin cannot be deleted.
           </div>
-        </main>
-      </div>
 
       {/* Add Admin Modal */}
       {showForm && (
@@ -256,6 +226,6 @@ export default function AdminUsersPage() {
           </div>
         </div>
       )}
-    </div>
+    </AdminShell>
   );
 }

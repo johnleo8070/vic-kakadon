@@ -2,10 +2,10 @@ export function ProductCardSkeleton() {
   return (
     <div className="card animate-pulse">
       <div className="aspect-square bg-gray-200" />
-      <div className="p-4 space-y-2">
-        <div className="h-4 bg-gray-200 rounded w-3/4" />
-        <div className="h-3 bg-gray-200 rounded w-1/2" />
-        <div className="h-6 bg-gray-200 rounded w-1/3" />
+      <div className="p-2 sm:p-4 space-y-1.5 sm:space-y-2">
+        <div className="h-3 sm:h-4 bg-gray-200 rounded w-3/4" />
+        <div className="h-2.5 sm:h-3 bg-gray-200 rounded w-1/2" />
+        <div className="h-4 sm:h-6 bg-gray-200 rounded w-1/3" />
       </div>
     </div>
   );

@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import { Search, Eye, CheckCircle, Truck, Package, ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
+import AdminShell from "@/components/admin/AdminShell";
 
 export default function AdminOrdersPage() {
   const router = useRouter();
@@ -70,34 +70,8 @@ export default function AdminOrdersPage() {
   const orderStatuses = ["processing", "shipped", "delivered"];
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="flex">
-        <aside className="w-64 bg-dark text-white min-h-screen fixed left-0 top-0">
-          <div className="p-6 border-b border-white/10">
-            <div className="flex flex-col">
-              <Image src="/images/logo.png" alt="Kakadon Logo" width={150} height={50} className="object-contain bg-white/90 p-2 rounded-lg" priority />
-              <p className="text-xs text-gray-400 mt-2">Admin Panel</p>
-            </div>
-          </div>
-          <nav className="p-4 space-y-1">
-            {[
-              { href: "/admin", label: "Dashboard", icon: "📊" },
-              { href: "/admin/orders", label: "Orders", icon: "📦" },
-              { href: "/admin/products", label: "Products", icon: "🏷️" },
-              { href: "/admin/categories", label: "Categories", icon: "📂" },
-              { href: "/admin/admins", label: "Admins", icon: "👤" },
-              { href: "/admin/settings", label: "Settings", icon: "⚙️" },
-            ].map((item) => (
-              <Link key={item.href} href={item.href} className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-colors">
-                <span>{item.icon}</span>
-                <span className="text-sm font-medium">{item.label}</span>
-              </Link>
-            ))}
-          </nav>
-        </aside>
-
-        <main className="ml-64 flex-1 p-8">
-          <div className="flex items-center justify-between mb-6">
+    <AdminShell>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
               <h1 className="text-2xl font-bold font-serif text-dark">Orders Management</h1>
               <p className="text-gray-500">{orders.length} total orders</p>
@@ -210,8 +184,6 @@ export default function AdminOrdersPage() {
               </div>
             )}
           </div>
-        </main>
-      </div>
 
       {/* Order Detail Modal */}
       {selectedOrder && (
@@ -267,6 +239,6 @@ export default function AdminOrdersPage() {
           </div>
         </div>
       )}
-    </div>
+    </AdminShell>
   );
 }

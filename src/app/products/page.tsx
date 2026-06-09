@@ -164,7 +164,7 @@ function ProductsContent() {
 
         <div className="flex-1">
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 md:gap-6">
               {Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)}
             </div>
           ) : products.length === 0 ? (
@@ -174,23 +174,32 @@ function ProductsContent() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 md:gap-6">
                 {products.map((product) => (
                   <Link key={product.id} href={`/products/${product.slug}`} className="group card">
                     <div className="relative aspect-square overflow-hidden bg-gray-100">
                       <Image src={product.images?.[0] || "/images/placeholder.jpg"} alt={product.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" unoptimized />
-                      {product.isNew && <span className="absolute top-3 left-3 badge bg-green-500 text-white">NEW</span>}
-                      {product.isFeatured && <span className="absolute top-3 right-3 badge bg-gold text-dark"><Star className="w-3 h-3 inline mr-1" />FEATURED</span>}
+                      {product.isNew && (
+                        <span className="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 badge bg-green-500 text-white text-[10px] px-1.5 py-0.5 sm:text-xs sm:px-3 sm:py-1">NEW</span>
+                      )}
+                      {product.isFeatured && (
+                        <span className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 badge bg-gold text-dark text-[10px] px-1.5 py-0.5 sm:text-xs sm:px-3 sm:py-1">
+                          <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 inline sm:mr-1" />
+                          <span className="hidden sm:inline">FEATURED</span>
+                        </span>
+                      )}
                       {product.stockQuantity !== null && product.stockQuantity !== undefined && product.stockQuantity <= 5 && product.stockQuantity > 0 && (
-                        <div className="absolute bottom-3 left-3"><span className="badge bg-red-500 text-white">Only {product.stockQuantity} left!</span></div>
+                        <div className="absolute bottom-1.5 left-1.5 sm:bottom-3 sm:left-3">
+                          <span className="badge bg-red-500 text-white text-[10px] px-1.5 py-0.5 sm:text-xs sm:px-3 sm:py-1">{product.stockQuantity} left</span>
+                        </div>
                       )}
                     </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold text-dark group-hover:text-primary transition-colors truncate">{product.name}</h3>
-                      <div className="flex items-center gap-1 mt-1">
-                        {[1, 2, 3, 4, 5].map((star) => <Star key={star} className="w-3 h-3 text-gold fill-gold" />)}
+                    <div className="p-2 sm:p-4">
+                      <h3 className="text-xs sm:text-base font-semibold text-dark group-hover:text-primary transition-colors truncate">{product.name}</h3>
+                      <div className="flex items-center gap-0.5 sm:gap-1 mt-0.5 sm:mt-1">
+                        {[1, 2, 3, 4, 5].map((star) => <Star key={star} className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gold fill-gold" />)}
                       </div>
-                      <p className="text-primary font-bold text-lg mt-2">{formatPrice(product.price)}</p>
+                      <p className="text-primary font-bold text-sm sm:text-lg mt-1 sm:mt-2">{formatPrice(product.price)}</p>
                     </div>
                   </Link>
                 ))}
@@ -218,7 +227,7 @@ export default function ProductsPage() {
   return (
     <Suspense fallback={
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-6">
           {Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)}
         </div>
       </div>
