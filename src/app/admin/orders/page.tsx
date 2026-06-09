@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
-import { Search, Eye, CheckCircle, Truck, Package, ChevronLeft, ChevronRight, Download } from "lucide-react";
-import { isAdminAuthenticated } from "@/lib/adminAuth";
+import { Search, Eye, ChevronLeft, ChevronRight, Download, Trash2 } from "lucide-react";
+import { isAdminAuthenticated, adminFetch } from "@/lib/adminAuth";
 import AdminShell from "@/components/admin/AdminShell";
+import { showToast } from "@/components/Toast";
 
 export default function AdminOrdersPage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function AdminOrdersPage() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const perPage = 10;
 
@@ -48,6 +50,28 @@ export default function AdminOrdersPage() {
       const data = await res.json();
       if (data.success) fetchOrders();
     } catch (e) { console.error(e); }
+  };
+
+  const handleDeleteOrder = async (order: { id: number; orderNumber?: string; customerName?: string }) => {
+    const label = order.orderNumber || `#${order.id}`;
+    if (!confirm(`Delete order ${label}${order.customerName ? ` for ${order.customerName}` : ""}? This cannot be undone.`)) return;
+
+    setDeletingId(order.id);
+    try {
+      const res = await adminFetch(`/api/orders/${order.id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        showToast("success", "Order deleted");
+        if (selectedOrder?.id === order.id) setSelectedOrder(null);
+        fetchOrders();
+      } else {
+        showToast("error", data.error || "Failed to delete order");
+      }
+    } catch {
+      showToast("error", "Failed to delete order");
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const exportCSV = () => {
@@ -156,9 +180,19 @@ export default function AdminOrdersPage() {
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</td>
                         <td className="px-6 py-4">
-                          <button onClick={() => setSelectedOrder(order)} className="p-1 hover:bg-gray-100 rounded">
-                            <Eye className="w-4 h-4 text-gray-500" />
-                          </button>
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => setSelectedOrder(order)} className="p-1.5 hover:bg-gray-100 rounded" title="View order">
+                              <Eye className="w-4 h-4 text-gray-500" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteOrder(order)}
+                              disabled={deletingId === order.id}
+                              className="p-1.5 hover:bg-red-50 rounded disabled:opacity-50"
+                              title="Delete order"
+                            >
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -235,6 +269,17 @@ export default function AdminOrdersPage() {
                   <img src={selectedOrder.paymentScreenshot} alt="Payment proof" className="max-h-48 rounded-lg" />
                 </div>
               )}
+              <div className="flex justify-end pt-4 border-t">
+                <button
+                  type="button"
+                  onClick={() => handleDeleteOrder(selectedOrder)}
+                  disabled={deletingId === selectedOrder.id}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {deletingId === selectedOrder.id ? "Deleting..." : "Delete Order"}
+                </button>
+              </div>
             </div>
           </div>
         </div>

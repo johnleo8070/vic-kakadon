@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { isAdmin } from "@/lib/auth";
+import { mapOrderFromDb } from "@/lib/utils";
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -28,21 +30,52 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
     }
 
-    const mappedData = data ? {
-      ...data,
-      orderNumber: data.order_number,
-      customerName: data.customer_name,
-      totalAmount: data.total_amount,
-      paymentScreenshot: data.payment_screenshot,
-      paymentStatus: data.payment_status,
-      orderStatus: data.order_status,
-      createdAt: data.created_at,
-    } : null;
+    const mappedData = data ? mapOrderFromDb(data as Record<string, unknown>) : null;
 
     return NextResponse.json({ success: true, data: mappedData });
   } catch (error) {
     console.error("Error updating order:", error);
     return NextResponse.json({ success: false, error: "Failed to update order" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!(await isAdmin(request))) {
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { id } = await params;
+    const orderId = parseInt(id);
+    if (Number.isNaN(orderId)) {
+      return NextResponse.json({ success: false, error: "Invalid order ID" }, { status: 400 });
+    }
+
+    const supabase = getSupabaseAdmin();
+
+    if (!supabase) {
+      const { db } = await import("@/db");
+      const { orders } = await import("@/db/schema");
+      const { eq } = await import("drizzle-orm");
+
+      const [deleted] = await db.delete(orders).where(eq(orders.id, orderId)).returning({ id: orders.id });
+      if (!deleted) {
+        return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
+      }
+
+      return NextResponse.json({ success: true, message: "Order deleted" });
+    }
+
+    const { error } = await supabase.from("orders").delete().eq("id", orderId);
+
+    if (error) {
+      return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, message: "Order deleted" });
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    return NextResponse.json({ success: false, error: "Failed to delete order" }, { status: 500 });
   }
 }
 
@@ -65,16 +98,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
     }
 
-    const mappedData = data ? {
-      ...data,
-      orderNumber: data.order_number,
-      customerName: data.customer_name,
-      totalAmount: data.total_amount,
-      paymentScreenshot: data.payment_screenshot,
-      paymentStatus: data.payment_status,
-      orderStatus: data.order_status,
-      createdAt: data.created_at,
-    } : null;
+    const mappedData = data ? mapOrderFromDb(data as Record<string, unknown>) : null;
 
     return NextResponse.json({ success: true, data: mappedData });
   } catch (error) {

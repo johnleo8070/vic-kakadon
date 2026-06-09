@@ -39,18 +39,21 @@ export default function CategoriesPage() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-64 bg-gray-200 rounded-2xl animate-pulse" />
-          ))}
+        <div className="-mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 overflow-x-auto md:overflow-visible pb-2 md:pb-0 snap-x snap-mandatory">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-72 w-[85vw] max-w-sm shrink-0 md:w-auto md:shrink bg-gray-200 rounded-2xl animate-pulse snap-start" />
+            ))}
+          </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="-mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 overflow-x-auto md:overflow-visible pb-2 md:pb-0 snap-x snap-mandatory scroll-smooth">
           {categories.map((cat) => (
             <Link
               key={cat.id}
               href={`/products?category=${cat.slug}`}
-              className="group relative overflow-hidden rounded-2xl h-72"
+              className="group relative overflow-hidden rounded-2xl h-72 shrink-0 w-[85vw] max-w-sm md:w-auto md:shrink snap-start"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-primary/90 to-primary-dark" />
               {cat.image && (
@@ -71,6 +74,7 @@ export default function CategoriesPage() {
               </div>
             </Link>
           ))}
+          </div>
         </div>
       )}
 

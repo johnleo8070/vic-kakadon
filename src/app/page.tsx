@@ -177,12 +177,13 @@ export default async function HomePage() {
             <h2 className="section-title">Shop by Category</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">Explore our curated collections across various categories</p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+          <div className="-mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="flex md:grid md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6 overflow-x-auto md:overflow-visible pb-2 md:pb-0 snap-x snap-mandatory scroll-smooth">
             {catList.map((cat: { id: number; name: string; slug: string; image: string | null }) => (
               <Link
                 key={cat.id}
                 href={`/products?category=${cat.slug}`}
-                className="group relative overflow-hidden rounded-2xl aspect-square"
+                className="group relative overflow-hidden rounded-2xl aspect-square shrink-0 w-[42vw] max-w-[160px] md:w-auto md:max-w-none md:shrink snap-start"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/90 to-primary-dark" />
                 {cat.image && (
@@ -194,6 +195,7 @@ export default async function HomePage() {
                 </div>
               </Link>
             ))}
+            </div>
           </div>
           <div className="text-center mt-8">
             <Link href="/categories" className="btn-outline inline-flex items-center gap-2">

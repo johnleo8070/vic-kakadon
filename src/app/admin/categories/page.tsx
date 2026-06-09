@@ -103,7 +103,8 @@ export default function AdminCategoriesPage() {
           </div>
 
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-            <table className="w-full">
+            <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px]">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">Name</th>
@@ -136,11 +137,12 @@ export default function AdminCategoriesPage() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
 
       {/* Category Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
             <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-xl font-bold font-serif">{editingCategory ? "Edit Category" : "Add Category"}</h2>
