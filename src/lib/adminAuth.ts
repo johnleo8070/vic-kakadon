@@ -55,5 +55,5 @@ export async function adminFetch(input: string, init: RequestInit = {}): Promise
   const token = getAdminToken();
   const headers = new Headers(init.headers || {});
   if (token) headers.set("Authorization", `Bearer ${token}`);
-  return fetch(input, { ...init, headers });
+  return fetch(input, { ...init, headers, credentials: "include" });
 }

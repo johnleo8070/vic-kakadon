@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
 import { isAdmin } from "@/lib/auth";
+import { mapAdminFromDb } from "@/lib/utils";
 
 // PUT /api/admin/users/:id - update an admin's password and/or role
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -9,12 +10,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
   try {
-    const supabase = getSupabaseAdmin();
-    if (!supabase) {
-      return NextResponse.json({ success: false, error: "Database not configured" }, { status: 500 });
-    }
-
     const { id } = await params;
+    const adminId = parseInt(id);
     const body = await request.json();
     const { password, role } = body;
 
@@ -31,18 +28,46 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ success: false, error: "Nothing to update" }, { status: 400 });
     }
 
+    const supabase = getSupabaseAdmin();
+
+    if (!supabase) {
+      const { db } = await import("@/db");
+      const { admins } = await import("@/db/schema");
+      const { eq } = await import("drizzle-orm");
+
+      const [updated] = await db
+        .update(admins)
+        .set(updateData)
+        .where(eq(admins.id, adminId))
+        .returning({
+          id: admins.id,
+          username: admins.username,
+          role: admins.role,
+          createdAt: admins.createdAt,
+        });
+
+      if (!updated) {
+        return NextResponse.json({ success: false, error: "Admin not found" }, { status: 404 });
+      }
+
+      return NextResponse.json({ success: true, data: updated });
+    }
+
     const { data, error } = await supabase
       .from("admins")
       .update(updateData)
-      .eq("id", parseInt(id))
-      .select("id, username, role")
+      .eq("id", adminId)
+      .select("id, username, role, created_at")
       .single();
 
     if (error || !data) {
       return NextResponse.json({ success: false, error: "Admin not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, data });
+    return NextResponse.json({
+      success: true,
+      data: mapAdminFromDb(data as Record<string, unknown>),
+    });
   } catch (error) {
     console.error("Error updating admin:", error);
     return NextResponse.json({ success: false, error: "Failed to update admin" }, { status: 500 });
@@ -55,20 +80,35 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
   try {
+    const { id } = await params;
+    const adminId = parseInt(id);
+
     const supabase = getSupabaseAdmin();
+
     if (!supabase) {
-      return NextResponse.json({ success: false, error: "Database not configured" }, { status: 500 });
+      const { db } = await import("@/db");
+      const { admins } = await import("@/db/schema");
+      const { eq, count } = await import("drizzle-orm");
+
+      const [{ value: total }] = await db.select({ value: count() }).from(admins);
+      if (total <= 1) {
+        return NextResponse.json({ success: false, error: "Cannot delete the last admin account" }, { status: 400 });
+      }
+
+      const [deleted] = await db.delete(admins).where(eq(admins.id, adminId)).returning({ id: admins.id });
+      if (!deleted) {
+        return NextResponse.json({ success: false, error: "Admin not found" }, { status: 404 });
+      }
+
+      return NextResponse.json({ success: true, message: "Admin deleted" });
     }
 
-    const { id } = await params;
-
-    // Prevent deleting the last remaining admin
     const { count } = await supabase.from("admins").select("*", { count: "exact", head: true });
     if ((count ?? 0) <= 1) {
       return NextResponse.json({ success: false, error: "Cannot delete the last admin account" }, { status: 400 });
     }
 
-    const { error } = await supabase.from("admins").delete().eq("id", parseInt(id));
+    const { error } = await supabase.from("admins").delete().eq("id", adminId);
 
     if (error) {
       return NextResponse.json({ success: false, error: "Admin not found" }, { status: 404 });

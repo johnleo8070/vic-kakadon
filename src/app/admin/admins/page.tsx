@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Trash2, KeyRound, X, ShieldCheck, UserPlus } from "lucide-react";
-import { isAdminAuthenticated, getAdminAuth, adminFetch } from "@/lib/adminAuth";
+import { isAdminAuthenticated, getAdminAuth, adminFetch, clearAdminAuth } from "@/lib/adminAuth";
 import { showToast } from "@/components/Toast";
 import AdminShell from "@/components/admin/AdminShell";
 
@@ -25,6 +25,7 @@ export default function AdminUsersPage() {
   const [pwModal, setPwModal] = useState<AdminUser | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [currentUser, setCurrentUser] = useState<{ username: string } | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAdminAuthenticated()) { router.push("/admin/login"); return; }
@@ -34,13 +35,27 @@ export default function AdminUsersPage() {
 
   const fetchAdmins = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await adminFetch("/api/admin/users");
       const data = await res.json();
-      if (data.success) setAdmins(data.data);
-      else showToast("error", data.error || "Failed to load admins");
-    } catch { showToast("error", "Failed to load admins"); }
-    finally { setLoading(false); }
+      if (res.status === 401) {
+        clearAdminAuth();
+        router.push("/admin/login");
+        return;
+      }
+      if (data.success) {
+        setAdmins(Array.isArray(data.data) ? data.data : []);
+      } else {
+        setLoadError(data.error || "Failed to load admins");
+        showToast("error", data.error || "Failed to load admins");
+      }
+    } catch {
+      setLoadError("Failed to load admins");
+      showToast("error", "Failed to load admins");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -119,7 +134,8 @@ export default function AdminUsersPage() {
           </div>
 
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-            <table className="w-full">
+            <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px]">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">Username / Email</th>
@@ -131,6 +147,8 @@ export default function AdminUsersPage() {
               <tbody>
                 {loading ? (
                   <tr><td colSpan={4} className="text-center py-12"><div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto" /></td></tr>
+                ) : loadError ? (
+                  <tr><td colSpan={4} className="text-center py-12 text-red-500">{loadError}</td></tr>
                 ) : admins.length === 0 ? (
                   <tr><td colSpan={4} className="text-center py-12 text-gray-500">No admins found</td></tr>
                 ) : (
@@ -147,7 +165,9 @@ export default function AdminUsersPage() {
                       <td className="px-6 py-4">
                         <span className="badge bg-primary/10 text-primary text-xs capitalize">{a.role}</span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{new Date(a.createdAt).toLocaleDateString()}</td>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        {a.createdAt ? new Date(a.createdAt).toLocaleDateString() : "—"}
+                      </td>
                       <td className="px-6 py-4">
                         <div className="flex gap-2">
                           <button onClick={() => { setPwModal(a); setNewPassword(""); }} className="p-1.5 hover:bg-gray-100 rounded" title="Change password">
@@ -163,6 +183,7 @@ export default function AdminUsersPage() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
 
           <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-700">
@@ -171,7 +192,7 @@ export default function AdminUsersPage() {
 
       {/* Add Admin Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
             <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-xl font-bold font-serif">Add New Admin</h2>
@@ -206,7 +227,7 @@ export default function AdminUsersPage() {
 
       {/* Change Password Modal */}
       {pwModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
             <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-xl font-bold font-serif">Change Password</h2>

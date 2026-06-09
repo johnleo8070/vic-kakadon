@@ -101,7 +101,7 @@ export default function AdminDashboard() {
                 <tbody>
                   {stats?.recentOrders?.slice(0, 5).map((order: any) => (
                     <tr key={order.id} className="border-b hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm font-medium">#{order.id}</td>
+                      <td className="px-6 py-4 text-sm font-medium">{order.orderNumber || `#${order.id}`}</td>
                       <td className="px-6 py-4 text-sm">{order.customerName}</td>
                       <td className="px-6 py-4 text-sm font-medium">{formatPrice(order.totalAmount)}</td>
                       <td className="px-6 py-4">

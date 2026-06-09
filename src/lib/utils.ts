@@ -80,3 +80,27 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
 };
 
 export const ORDER_STATUS_STEPS = ["processing", "shipped", "delivered"] as const;
+
+/** Map Supabase snake_case order row to camelCase for the frontend. */
+export function mapOrderFromDb(order: Record<string, unknown>) {
+  return {
+    ...order,
+    orderNumber: order.order_number,
+    customerName: order.customer_name,
+    totalAmount: order.total_amount,
+    paymentScreenshot: order.payment_screenshot,
+    paymentStatus: order.payment_status,
+    orderStatus: order.order_status,
+    createdAt: order.created_at,
+  };
+}
+
+/** Map Supabase snake_case admin row to camelCase for the frontend. */
+export function mapAdminFromDb(admin: Record<string, unknown>) {
+  return {
+    id: admin.id,
+    username: admin.username,
+    role: admin.role,
+    createdAt: admin.created_at,
+  };
+}

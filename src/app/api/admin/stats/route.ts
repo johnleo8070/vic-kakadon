@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { mapOrderFromDb } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -37,7 +38,7 @@ export async function GET() {
         totalCategories: totalCategories ?? 0,
         totalRevenue,
         pendingOrders: pendingOrders ?? 0,
-        recentOrders: recentOrders ?? [],
+        recentOrders: (recentOrders ?? []).map((order) => mapOrderFromDb(order as Record<string, unknown>)),
       },
     });
   } catch (error) {
