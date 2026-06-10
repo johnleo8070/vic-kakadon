@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { generateOrderNumber } from "@/lib/utils";
+import { sendOrderConfirmationEmail, OrderEmailData } from "@/lib/email";
 
 export async function GET(request: Request) {
   try {
@@ -88,6 +89,28 @@ export async function POST(request: Request) {
       .single();
 
     if (error) throw error;
+
+    // Send automatic order confirmation email
+    try {
+      const emailData: OrderEmailData = {
+        orderNumber: order.order_number,
+        customerName: order.customer_name,
+        customerEmail: order.email,
+        totalAmount: order.total_amount,
+        products: order.products || [],
+        address: order.address,
+        city: order.city,
+        state: order.state,
+        phone: order.phone,
+        trackingNumber: order.tracking_number || "",
+        paymentStatus: order.payment_status,
+        orderStatus: order.order_status,
+      };
+      await sendOrderConfirmationEmail(emailData);
+    } catch (emailError) {
+      console.error("Error sending order confirmation email:", emailError);
+      // Don't fail the order creation if email fails
+    }
 
     // Decrement stock for each ordered product
     for (const item of orderProducts) {

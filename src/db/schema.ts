@@ -57,6 +57,7 @@ export const orders = pgTable("orders", {
   paymentScreenshot: varchar("payment_screenshot", { length: 500 }).default(""),
   paymentStatus: varchar("payment_status", { length: 50 }).default("pending"),
   orderStatus: varchar("order_status", { length: 50 }).default("processing"),
+  trackingNumber: varchar("tracking_number", { length: 255 }).default(""),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

@@ -16,6 +16,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  env: {
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
+  },
 };
 
 export default nextConfig;

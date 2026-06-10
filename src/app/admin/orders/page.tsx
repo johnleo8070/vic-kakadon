@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
-import { Search, Eye, ChevronLeft, ChevronRight, Download, Trash2 } from "lucide-react";
+import { Search, Eye, ChevronLeft, ChevronRight, Download, Trash2, Mail } from "lucide-react";
 import { isAdminAuthenticated, adminFetch } from "@/lib/adminAuth";
 import AdminShell from "@/components/admin/AdminShell";
 import { showToast } from "@/components/Toast";
@@ -40,12 +40,12 @@ export default function AdminOrdersPage() {
 
   useEffect(() => { fetchOrders(); }, [filterStatus, searchQuery]);
 
-  const updateOrderStatus = async (id: number, field: string, value: string) => {
+  const updateOrderStatus = async (id: number, field: string, value: string, notifyCustomer: boolean = false) => {
     try {
       const res = await fetch(`/api/orders/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [field]: value }),
+        body: JSON.stringify({ [field]: value, notifyCustomer }),
       });
       const data = await res.json();
       if (data.success) fetchOrders();
@@ -159,24 +159,56 @@ export default function AdminOrdersPage() {
                         <td className="px-6 py-4 text-sm">{order.products?.length || 0} items</td>
                         <td className="px-6 py-4 text-sm font-medium">{formatPrice(order.totalAmount)}</td>
                         <td className="px-6 py-4">
-                          <select
-                            value={order.paymentStatus}
-                            onChange={(e) => updateOrderStatus(order.id, "paymentStatus", e.target.value)}
-                            className={`px-2 py-1 rounded-full text-xs font-medium border-0 ${
-                              order.paymentStatus === "confirmed" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
-                            }`}
-                          >
-                            {paymentStatuses.map((s) => <option key={s} value={s}>{s}</option>)}
-                          </select>
+                          <div className="flex items-center gap-2">
+                            <select
+                              value={order.paymentStatus}
+                              onChange={(e) => {
+                                const checkbox = document.getElementById(`notify-payment-${order.id}`) as HTMLInputElement;
+                                updateOrderStatus(order.id, "paymentStatus", e.target.value, checkbox?.checked || false);
+                              }}
+                              className={`px-2 py-1 rounded-full text-xs font-medium border-0 ${
+                                order.paymentStatus === "confirmed" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+                              }`}
+                            >
+                              {paymentStatuses.map((s) => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                            <div className="relative group">
+                              <input
+                                type="checkbox"
+                                id={`notify-payment-${order.id}`}
+                                className="w-4 h-4 text-primary rounded cursor-pointer"
+                                title="Notify customer via email"
+                              />
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">
+                                Notify customer
+                              </div>
+                            </div>
+                          </div>
                         </td>
                         <td className="px-6 py-4">
-                          <select
-                            value={order.orderStatus}
-                            onChange={(e) => updateOrderStatus(order.id, "orderStatus", e.target.value)}
-                            className="px-2 py-1 rounded-full text-xs font-medium border-0 bg-blue-100 text-blue-700"
-                          >
-                            {orderStatuses.map((s) => <option key={s} value={s}>{s}</option>)}
-                          </select>
+                          <div className="flex items-center gap-2">
+                            <select
+                              value={order.orderStatus}
+                              onChange={(e) => {
+                                const checkbox = document.getElementById(`notify-order-${order.id}`) as HTMLInputElement;
+                                updateOrderStatus(order.id, "orderStatus", e.target.value, checkbox?.checked || false);
+                              }}
+                              className="px-2 py-1 rounded-full text-xs font-medium border-0 bg-blue-100 text-blue-700"
+                            >
+                              {orderStatuses.map((s) => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                            <div className="relative group">
+                              <input
+                                type="checkbox"
+                                id={`notify-order-${order.id}`}
+                                className="w-4 h-4 text-primary rounded cursor-pointer"
+                                title="Notify customer via email"
+                              />
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">
+                                Notify customer
+                              </div>
+                            </div>
+                          </div>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</td>
                         <td className="px-6 py-4">

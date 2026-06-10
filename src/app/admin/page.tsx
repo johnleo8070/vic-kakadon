@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { DollarSign, ShoppingBag, Package, Clock } from "lucide-react";
+import { DollarSign, ShoppingBag, Package, Clock, RefreshCw } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
 import AdminShell from "@/components/admin/AdminShell";
@@ -12,6 +12,20 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchStats = async () => {
+    try {
+      const res = await fetch("/api/admin/stats");
+      const data = await res.json();
+      if (data.success) setStats(data.data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     if (!isAdminAuthenticated()) {
@@ -19,18 +33,11 @@ export default function AdminDashboard() {
       return;
     }
 
-    const fetchStats = async () => {
-      try {
-        const res = await fetch("/api/admin/stats");
-        const data = await res.json();
-        if (data.success) setStats(data.data);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchStats();
+
+    // Auto-refresh stats every 30 seconds
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
   }, [router]);
 
   if (loading) {
@@ -58,6 +65,14 @@ export default function AdminDashboard() {
               <p className="text-gray-500">Welcome back! Here's what's happening with your store.</p>
             </div>
             <div className="flex gap-3">
+              <button
+                onClick={() => { setRefreshing(true); fetchStats(); }}
+                disabled={refreshing}
+                className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-shadow disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
               <Link href="/" className="px-4 py-2 bg-white rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-shadow">
                 View Store
               </Link>

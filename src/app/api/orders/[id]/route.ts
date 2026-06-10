@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { isAdmin } from "@/lib/auth";
 import { mapOrderFromDb } from "@/lib/utils";
+import { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, OrderEmailData } from "@/lib/email";
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -12,7 +13,18 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     const { id } = await params;
     const body = await request.json();
-    const { paymentStatus, orderStatus, notes } = body;
+    const { paymentStatus, orderStatus, notes, notifyCustomer } = body;
+
+    // Get current order data before update
+    const { data: currentOrder } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("id", parseInt(id))
+      .single();
+
+    if (!currentOrder) {
+      return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
+    }
 
     const updateData: Record<string, unknown> = {};
     if (paymentStatus !== undefined) updateData.payment_status = paymentStatus;
@@ -31,6 +43,39 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
 
     const mappedData = data ? mapOrderFromDb(data as Record<string, unknown>) : null;
+
+    // Send email notification if notifyCustomer is true and status changed
+    if (notifyCustomer && (paymentStatus !== undefined || orderStatus !== undefined)) {
+      try {
+        const emailData: OrderEmailData = {
+          orderNumber: data.order_number,
+          customerName: data.customer_name,
+          customerEmail: data.email,
+          totalAmount: data.total_amount,
+          products: data.products || [],
+          address: data.address,
+          city: data.city,
+          state: data.state,
+          phone: data.phone,
+          trackingNumber: data.tracking_number,
+          paymentStatus: data.payment_status,
+          orderStatus: data.order_status,
+        };
+
+        // If payment status changed to confirmed, send confirmation email
+        if (paymentStatus === 'confirmed' && currentOrder.payment_status !== 'confirmed') {
+          await sendOrderConfirmationEmail(emailData);
+        } 
+        // Otherwise send status update email
+        else {
+          const previousStatus = orderStatus !== undefined ? currentOrder.order_status : undefined;
+          await sendOrderStatusUpdateEmail(emailData, previousStatus);
+        }
+      } catch (emailError) {
+        console.error("Error sending email notification:", emailError);
+        // Don't fail the update if email fails
+      }
+    }
 
     return NextResponse.json({ success: true, data: mappedData });
   } catch (error) {
