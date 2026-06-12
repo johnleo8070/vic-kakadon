@@ -1,12 +1,8 @@
 import { Resend } from 'resend';
 
-// Use environment variables with fallback to hardcoded values
-const resendApiKey = process.env.RESEND_API_KEY || 're_2oQyEo8B_6YXPbfuWpFHCkwrxJvhXbXk1';
+// Use environment variables for Resend configuration
+const resendApiKey = process.env.RESEND_API_KEY;
 const resendFromEmail = process.env.RESEND_FROM_EMAIL || 'notifications@vic-kakadon.com.ng';
-
-if (!process.env.RESEND_API_KEY) {
-  console.warn('Using hardcoded RESEND_API_KEY (env var not loaded)');
-}
 
 const resend = new Resend(resendApiKey);
 
