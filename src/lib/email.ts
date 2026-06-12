@@ -180,7 +180,7 @@ function generateOrderConfirmationTemplate(orderData: OrderEmailData): string {
 
             <!-- CTA -->
             <div style="text-align: center; margin-bottom: 30px;">
-              <a href="${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/track" style="display: inline-block; background: linear-gradient(135deg, #8B0000 0%, #D4A017 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+              <a href="${process.env.NEXT_PUBLIC_API_URL || 'https://vic-kakadon.com.ng'}/track" style="display: inline-block; background: linear-gradient(135deg, #8B0000 0%, #D4A017 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
                 Track Your Order
               </a>
             </div>
@@ -274,7 +274,7 @@ function generateOrderStatusUpdateTemplate(
 
             <!-- CTA -->
             <div style="text-align: center; margin-bottom: 30px;">
-              <a href="${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/track" style="display: inline-block; background: linear-gradient(135deg, #8B0000 0%, #D4A017 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+              <a href="${process.env.NEXT_PUBLIC_API_URL || 'https://vic-kakadon.com.ng'}/track" style="display: inline-block; background: linear-gradient(135deg, #8B0000 0%, #D4A017 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
                 Track Your Order
               </a>
             </div>
