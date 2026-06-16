@@ -40,6 +40,7 @@ export default function Header() {
     { href: "/", label: "Home" },
     { href: "/products", label: "Products" },
     { href: "/categories", label: "Categories" },
+    { href: "/about", label: "About Us" },
     { href: "/track", label: "Track Order" },
     { href: "/contact", label: "Contact" },
   ];

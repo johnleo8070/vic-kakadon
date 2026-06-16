@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, Plus, Edit, Trash2, Eye, X, Upload } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Eye, X, Upload, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { showToast } from "@/components/Toast";
@@ -38,6 +38,8 @@ export default function AdminProductsPage() {
   const [saving, setSaving] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [formData, setFormData] = useState({
     name: "", slug: "", description: "", price: "", categoryId: "", sizes: "", colors: "", stockQuantity: "", availablePieces: "", isAvailable: true, isFeatured: false, isNew: false
   });
@@ -89,7 +91,7 @@ export default function AdminProductsPage() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/products");
+      const res = await fetch("/api/products?limit=10000");
       const data = await res.json();
       if (data.success) setProducts(data.data);
     } catch (e) { console.error(e); }
@@ -162,6 +164,18 @@ export default function AdminProductsPage() {
   };
 
   const filteredProducts = products.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
+  const currentProducts = filteredProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1);
+  };
 
   return (
     <AdminShell>
@@ -181,7 +195,7 @@ export default function AdminProductsPage() {
           <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
             <div className="relative max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="input-field pl-10" placeholder="Search products..." />
+              <input value={searchQuery} onChange={handleSearchChange} className="input-field pl-10" placeholder="Search products..." />
             </div>
           </div>
 
@@ -203,7 +217,7 @@ export default function AdminProductsPage() {
                   ) : filteredProducts.length === 0 ? (
                     <tr><td colSpan={5} className="text-center py-12 text-gray-500">No products found</td></tr>
                   ) : (
-                    filteredProducts.map((p) => (
+                    currentProducts.map((p) => (
                       <tr key={p.id} className="border-b hover:bg-gray-50">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
@@ -238,6 +252,46 @@ export default function AdminProductsPage() {
                 </tbody>
               </table>
             </div>
+            
+            {/* Pagination Controls */}
+            {!loading && filteredProducts.length > 0 && (
+              <div className="p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">Rows per page:</span>
+                  <select 
+                    value={itemsPerPage} 
+                    onChange={handleItemsPerPageChange}
+                    className="border border-gray-300 rounded-md text-sm py-1.5 pl-2 pr-8 focus:ring-primary focus:border-primary"
+                  >
+                    {[10, 20, 50, 100, 200, 500].map(n => (
+                      <option key={n} value={n}>{n} / page</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-gray-500">
+                    Showing {Math.min((currentPage - 1) * itemsPerPage + 1, filteredProducts.length)} to {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {filteredProducts.length} entries
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button 
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button 
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
       {/* Product Form Modal */}

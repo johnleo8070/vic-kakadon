@@ -205,12 +205,14 @@ function ProductsContent() {
                 ))}
               </div>
               {pagination.totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-8">
-                  <button onClick={() => setPagination((p) => ({ ...p, page: Math.max(1, p.page - 1) }))} disabled={pagination.page === 1} className="px-4 py-2 border rounded-lg disabled:opacity-50 hover:bg-gray-50">Previous</button>
-                  {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
-                    <button key={page} onClick={() => setPagination((p) => ({ ...p, page }))} className={`w-10 h-10 rounded-lg font-medium ${pagination.page === page ? "bg-primary text-white" : "border hover:bg-gray-50"}`}>{page}</button>
-                  ))}
-                  <button onClick={() => setPagination((p) => ({ ...p, page: Math.min(p.totalPages, p.page + 1) }))} disabled={pagination.page === pagination.totalPages} className="px-4 py-2 border rounded-lg disabled:opacity-50 hover:bg-gray-50">Next</button>
+                <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mt-8 px-2">
+                  <button onClick={() => setPagination((p) => ({ ...p, page: Math.max(1, p.page - 1) }))} disabled={pagination.page === 1} className="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base border rounded-lg disabled:opacity-50 hover:bg-gray-50">Previous</button>
+                  <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+                    {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
+                      <button key={page} onClick={() => setPagination((p) => ({ ...p, page }))} className={`w-8 h-8 sm:w-10 sm:h-10 text-sm sm:text-base rounded-lg font-medium ${pagination.page === page ? "bg-primary text-white" : "border hover:bg-gray-50"}`}>{page}</button>
+                    ))}
+                  </div>
+                  <button onClick={() => setPagination((p) => ({ ...p, page: Math.min(p.totalPages, p.page + 1) }))} disabled={pagination.page === pagination.totalPages} className="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base border rounded-lg disabled:opacity-50 hover:bg-gray-50">Next</button>
                 </div>
               )}
             </>
