@@ -4,9 +4,9 @@ import { ShieldCheck, Globe, Briefcase, Award, CheckCircle, ArrowRight } from "l
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 pb-16 animate-fade-in">
+    <div className="min-h-screen bg-gray-50 pb-16 animate-fade-in">
       {/* Hero Section */}
-      <section className="relative bg-dark text-white py-24 lg:py-32 overflow-hidden">
+      <section className="relative bg-dark text-white pt-32 pb-24 lg:pt-40 lg:pb-32 overflow-hidden">
         <div className="absolute inset-0 opacity-30">
           <Image 
             src="/images/about-img/store-img-1.jpeg" 
