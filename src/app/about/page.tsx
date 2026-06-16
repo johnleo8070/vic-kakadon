@@ -36,8 +36,7 @@ export default function AboutPage() {
                 Welcome to VIC-KAKADON INTERNATIONAL LIMITED, a premier, fully incorporated corporate entity dedicated to driving value across local and international markets. Established with a vision to deliver excellence, reliability, and seamless execution, we operate as a dynamic force in commerce, trade, and corporate services.
               </p>
             </div>
-            
-            <div className="hidden lg:block flex-1 relative h-[400px] w-full rounded-2xl overflow-hidden shadow-2xl border-4 border-white/10">
+            <div className="w-full lg:flex-1 relative h-[250px] sm:h-[350px] lg:h-[400px] rounded-2xl overflow-hidden shadow-2xl border-4 border-white/10">
               <video 
                 src="/images/about-img/store-vid-1.mp4" 
                 autoPlay 
