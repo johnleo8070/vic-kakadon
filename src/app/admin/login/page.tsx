@@ -62,7 +62,7 @@ export default function AdminLoginPage() {
                 value={formData.username}
                 onChange={(e) => setFormData((d) => ({ ...d, username: e.target.value }))}
                 className="input-field pl-10"
-                placeholder="admin@kakadon.com"
+                placeholder="Enter your email or username"
                 required
               />
             </div>
@@ -97,11 +97,7 @@ export default function AdminLoginPage() {
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-xs text-gray-400">
-            Default: admin@kakadon.com / admin123
-          </p>
-        </div>
+
       </div>
     </div>
   );
