@@ -1,8 +1,138 @@
+"use client";
+
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShieldCheck, Globe, Briefcase, Award, CheckCircle, ArrowRight } from "lucide-react";
+import { 
+  ShieldCheck, 
+  Globe, 
+  Briefcase, 
+  Award, 
+  CheckCircle, 
+  ArrowRight,
+  Video,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Maximize,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Image as ImageIcon
+} from "lucide-react";
+
+const galleryImages = [
+  {
+    src: "/images/about-img/store-img-8.jpeg",
+    title: "Flagship Showroom Entrance",
+    desc: "Welcome to our main showroom, featuring a vast collection of imported goods."
+  },
+  {
+    src: "/images/about-img/store-img-9.jpeg",
+    title: "Premium Display Aisles",
+    desc: "A wide variety of high-quality products arranged for easy selection."
+  },
+  {
+    src: "/images/about-img/store-img-10.jpeg",
+    title: "Household & General Goods Section",
+    desc: "Dedicated sections for premium household merchandise."
+  },
+  {
+    src: "/images/about-img/store-img-11.jpeg",
+    title: "Textiles & Material Warehouse",
+    desc: "Bulk storage of high-demand textiles and quality fabrics."
+  },
+  {
+    src: "/images/about-img/store-img-12.jpeg",
+    title: "Wholesale Inventory Hub",
+    desc: "Vast warehouse space ready for nationwide distribution."
+  },
+  {
+    src: "/images/about-img/store-img-13.jpeg",
+    title: "Glassware & Decor Showroom",
+    desc: "Elegant retail and wholesale glassware and decorative items."
+  },
+  {
+    src: "/images/about-img/store-img-14.jpeg",
+    title: "Electronics & Smart Goods Section",
+    desc: "Carefully sourced electronic appliances and general hardware."
+  },
+  {
+    src: "/images/about-img/store-img-15.jpeg",
+    title: "Cosmetics & Care Accessories",
+    desc: "Stocked sections with certified beauty and care goods."
+  },
+  {
+    src: "/images/about-img/store-img-16.jpeg",
+    title: "Logistics & Loading Dock",
+    desc: "Efficient order packing and shipping departments for prompt deliveries."
+  }
+];
 
 export default function AboutPage() {
+  const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const togglePlay = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play().catch(err => console.log("Play failed", err));
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
+  const handleFullscreen = () => {
+    if (videoRef.current) {
+      if (videoRef.current.requestFullscreen) {
+        videoRef.current.requestFullscreen();
+      }
+    }
+  };
+
+  const openLightbox = (index: number) => {
+    setActiveImageIndex(index);
+  };
+
+  const closeLightbox = () => {
+    setActiveImageIndex(null);
+  };
+
+  const navigateLightbox = (direction: "next" | "prev") => {
+    if (activeImageIndex === null) return;
+    if (direction === "next") {
+      setActiveImageIndex((activeImageIndex + 1) % galleryImages.length);
+    } else {
+      setActiveImageIndex((activeImageIndex - 1 + galleryImages.length) % galleryImages.length);
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (activeImageIndex === null) return;
+      if (e.key === "ArrowLeft") {
+        navigateLightbox("prev");
+      } else if (e.key === "ArrowRight") {
+        navigateLightbox("next");
+      } else if (e.key === "Escape") {
+        closeLightbox();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeImageIndex]);
   return (
     <div className="min-h-screen bg-gray-50 pb-16 animate-fade-in">
       {/* Hero Section */}
@@ -177,6 +307,145 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Showroom & Operations Gallery Section */}
+      <section className="py-24 bg-gray-50 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-bold mb-4">
+              <Video className="w-4 h-4 text-primary" />
+              Inside VIC-KAKADON
+            </div>
+            <h2 className="text-3xl lg:text-5xl font-bold font-serif text-dark mb-4">
+              Our Showroom & Operations
+            </h2>
+            <div className="gold-divider"></div>
+            <p className="text-lg text-gray-600">
+              Explore our world-class flagship showroom, extensive warehousing facility, and global logistics hub.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-12 gap-12 items-start">
+            {/* Showroom Video Card - 5 columns */}
+            <div className="lg:col-span-5 bg-white p-6 rounded-3xl shadow-xl border border-gray-200/60 lg:sticky lg:top-28">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                    <Video className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-dark text-lg leading-tight">Virtual Showroom Tour</h3>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                      <span className="text-xs text-gray-500 font-medium">Watch Video Tour</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Custom Video Player Container */}
+              <div className="relative rounded-2xl overflow-hidden shadow-lg aspect-video bg-black group border border-gray-100">
+                <video
+                  ref={videoRef}
+                  src="/images/about-img/store-vid-2.mp4"
+                  loop
+                  playsInline
+                  className="w-full h-full object-cover cursor-pointer"
+                  onClick={togglePlay}
+                />
+                
+                {/* Big Play Button Overlay (visible when paused) */}
+                {!isPlaying && (
+                  <div 
+                    onClick={togglePlay}
+                    className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] cursor-pointer group-hover:bg-black/50 transition-all duration-300"
+                  >
+                    <div className="w-16 h-16 bg-primary hover:bg-primary-light text-white rounded-full flex items-center justify-center shadow-2xl transition-transform duration-300 hover:scale-110">
+                      <Play className="w-7 h-7 fill-white translate-x-0.5" />
+                    </div>
+                  </div>
+                )}
+
+                {/* Custom Controls Bar */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent p-4 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={togglePlay}
+                      className="text-white hover:text-gold transition-colors focus:outline-none cursor-pointer"
+                      title={isPlaying ? "Pause" : "Play"}
+                    >
+                      {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 fill-white" />}
+                    </button>
+                    <button
+                      onClick={toggleMute}
+                      className="text-white hover:text-gold transition-colors focus:outline-none cursor-pointer"
+                      title={isMuted ? "Unmute" : "Mute"}
+                    >
+                      {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                    </button>
+                  </div>
+                  
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={handleFullscreen}
+                      className="text-white hover:text-gold transition-colors focus:outline-none cursor-pointer"
+                      title="Fullscreen"
+                    >
+                      <Maximize className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <h4 className="font-bold text-dark text-base mb-2">Experience VIC-KAKADON</h4>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  Take a virtual walk through our flagship location. This video tour showcases our expansive retail aisles, fully stocked wholesale inventory, and high-efficiency loading bays designed for nationwide trade operations.
+                </p>
+              </div>
+            </div>
+
+            {/* Gallery Grid - 7 columns */}
+            <div className="lg:col-span-7">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gold/10 rounded-full flex items-center justify-center">
+                    <ImageIcon className="w-5 h-5 text-gold-dark" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-dark text-xl font-serif">Facility & Inventory Showcase</h3>
+                    <p className="text-sm text-gray-500">Click on any image to open in full screen</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {galleryImages.map((img, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => openLightbox(idx)}
+                    className="relative aspect-square rounded-2xl overflow-hidden cursor-pointer shadow-md border border-gray-200/60 bg-white group hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
+                  >
+                    <Image
+                      src={img.src}
+                      alt={img.title}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                    />
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 text-white">
+                      <span className="text-xs text-gold font-bold mb-1 uppercase tracking-wider">Gallery {idx + 1}</span>
+                      <h4 className="font-bold text-sm leading-tight mb-1">{img.title}</h4>
+                      <p className="text-[10px] text-gray-300 line-clamp-1">{img.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Corporate Credentials & Registration */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -280,6 +549,70 @@ export default function AboutPage() {
           </Link>
         </div>
       </section>
+
+      {/* Lightbox Modal */}
+      {activeImageIndex !== null && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md transition-all duration-300"
+          onClick={closeLightbox}
+        >
+          {/* Close Button */}
+          <button 
+            onClick={closeLightbox}
+            className="absolute top-6 right-6 text-white/75 hover:text-white bg-white/10 hover:bg-white/20 p-3 rounded-full transition-all duration-200 z-50 focus:outline-none cursor-pointer"
+            aria-label="Close Lightbox"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          {/* Navigation - Prev */}
+          <button 
+            onClick={(e) => { e.stopPropagation(); navigateLightbox("prev"); }}
+            className="absolute left-4 sm:left-6 text-white/75 hover:text-white bg-white/10 hover:bg-white/20 p-3 rounded-full transition-all duration-200 z-50 focus:outline-none cursor-pointer"
+            aria-label="Previous Image"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+
+          {/* Navigation - Next */}
+          <button 
+            onClick={(e) => { e.stopPropagation(); navigateLightbox("next"); }}
+            className="absolute right-4 sm:right-6 text-white/75 hover:text-white bg-white/10 hover:bg-white/20 p-3 rounded-full transition-all duration-200 z-50 focus:outline-none cursor-pointer"
+            aria-label="Next Image"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+
+          {/* Image Content Container */}
+          <div 
+            className="relative w-full h-full max-w-5xl max-h-[85vh] px-4 flex flex-col items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative w-full h-[60vh] sm:h-[65vh]">
+              <Image
+                src={galleryImages[activeImageIndex].src}
+                alt={galleryImages[activeImageIndex].title}
+                fill
+                className="object-contain animate-fade-in"
+                priority
+              />
+            </div>
+            
+            {/* Image Info Panel */}
+            <div className="mt-6 text-center max-w-xl">
+              <span className="inline-block bg-white/10 text-gold text-xs px-3 py-1 rounded-full mb-2 font-semibold">
+                Image {activeImageIndex + 1} of {galleryImages.length}
+              </span>
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
+                {galleryImages[activeImageIndex].title}
+              </h3>
+              <p className="text-sm text-gray-300 leading-relaxed">
+                {galleryImages[activeImageIndex].desc}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
