@@ -13,8 +13,6 @@ import {
   Video,
   Play,
   Pause,
-  Volume2,
-  VolumeX,
   Maximize,
   X,
   ChevronLeft,
@@ -73,7 +71,6 @@ const galleryImages = [
 export default function AboutPage() {
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const togglePlay = () => {
@@ -84,13 +81,6 @@ export default function AboutPage() {
         videoRef.current.play().catch(err => console.log("Play failed", err));
       }
       setIsPlaying(!isPlaying);
-    }
-  };
-
-  const toggleMute = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
     }
   };
 
@@ -348,6 +338,7 @@ export default function AboutPage() {
                   ref={videoRef}
                   src="/images/about-img/store-vid-2.mp4"
                   loop
+                  muted
                   playsInline
                   className="w-full h-full object-cover cursor-pointer"
                   onClick={togglePlay}
@@ -374,13 +365,6 @@ export default function AboutPage() {
                       title={isPlaying ? "Pause" : "Play"}
                     >
                       {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 fill-white" />}
-                    </button>
-                    <button
-                      onClick={toggleMute}
-                      className="text-white hover:text-gold transition-colors focus:outline-none cursor-pointer"
-                      title={isMuted ? "Unmute" : "Mute"}
-                    >
-                      {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                     </button>
                   </div>
                   
