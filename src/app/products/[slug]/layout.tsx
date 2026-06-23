@@ -3,13 +3,13 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 
 interface ProductLayoutProps {
   children: React.ReactNode;
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: ProductLayoutProps): Promise<Metadata> {
-  const slug = params.slug;
+  const { slug } = await params;
   const supabase = getSupabaseAdmin();
   
   let product = null;
@@ -69,6 +69,7 @@ export async function generateMetadata({ params }: ProductLayoutProps): Promise<
   };
 }
 
-export default function ProductLayout({ children }: ProductLayoutProps) {
+export default async function ProductLayout({ children, params }: ProductLayoutProps) {
+  await params; // Await params to satisfy Next.js 15 requirements
   return <>{children}</>;
 }
