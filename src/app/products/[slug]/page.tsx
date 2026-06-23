@@ -9,6 +9,7 @@ import { useCart } from "@/context/CartContext";
 import { showToast } from "@/components/Toast";
 import { formatPrice } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import ProductStructuredData from "@/components/ProductStructuredData";
 
 function ProductDetailContent() {
   const params = useParams();
@@ -105,14 +106,16 @@ function ProductDetailContent() {
   const isLowStock = product.stockQuantity !== null && product.stockQuantity > 0 && product.stockQuantity <= 5;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-        <Link href="/" className="hover:text-primary">Home</Link>
-        <span>/</span>
-        <Link href="/products" className="hover:text-primary">Products</Link>
-        <span>/</span>
-        <span className="text-dark font-medium">{product.name}</span>
-      </nav>
+    <>
+      <ProductStructuredData product={product} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+          <Link href="/" className="hover:text-primary">Home</Link>
+          <span>/</span>
+          <Link href="/products" className="hover:text-primary">Products</Link>
+          <span>/</span>
+          <span className="text-dark font-medium">{product.name}</span>
+        </nav>
 
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
         <div className="space-y-4">
@@ -215,6 +218,7 @@ function ProductDetailContent() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

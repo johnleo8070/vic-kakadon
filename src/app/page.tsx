@@ -2,8 +2,51 @@ import Link from "next/link";
 import Image from "next/image";
 import { Crown, ArrowRight, Truck, Shield, RotateCcw, Star } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "K D K Collections Wear | Premium Fashion & Accessories",
+  description: "Discover premium fashion and accessories at K D K Collections Wear. Shop the latest trends in watches, caps, shirts, shoes, and more. Quality products with fast delivery across Nigeria.",
+  keywords: "fashion, accessories, watches, caps, shirts, shoes, Nigeria, online shopping, premium wear, K D K Collections",
+  openGraph: {
+    title: "K D K Collections Wear | Premium Fashion & Accessories",
+    description: "Discover premium fashion and accessories at K D K Collections Wear. Shop the latest trends in watches, caps, shirts, shoes, and more.",
+    url: "https://vic-kakadon.com.ng",
+    siteName: "K D K Collections Wear",
+    images: [
+      {
+        url: "/images/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "K D K Collections Wear",
+      },
+    ],
+    locale: "en_NG",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "K D K Collections Wear | Premium Fashion & Accessories",
+    description: "Discover premium fashion and accessories at K D K Collections Wear. Shop the latest trends in watches, caps, shirts, shoes, and more.",
+    images: ["/images/logo.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: "your-google-verification-code",
+  },
+};
 
 export default async function HomePage() {
   const categories = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/api/categories`).then(
