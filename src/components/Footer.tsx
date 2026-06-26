@@ -29,6 +29,8 @@ export default function Footer() {
     phone: "0810 661 7255",
     email: "kakadonkakadon@yahoo.com",
     whatsapp: "https://wa.me/2348106617255",
+    facebook: "https://www.facebook.com/share/1GpGTWFoKy/?mibextid=wwXIfr",
+    instagram: "https://www.instagram.com/kdk_collections.wears?igsh=MXdldGtuYWxvbmc3",
   });
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export default function Footer() {
             const digits = phone.replace(/\D/g, "");
             const whatsapp = `https://wa.me/${digits.startsWith("0") ? "234" + digits.slice(1) : digits}`;
             
-            return { storeName, address, phone, email, whatsapp };
+            return { storeName, address, phone, email, whatsapp, facebook: prev.facebook, instagram: prev.instagram };
           });
         }
       })
@@ -74,13 +76,21 @@ export default function Footer() {
             <div className="flex gap-3 mt-6">
               {Object.entries(SocialIcons).map(([key, icon]) => {
                 const isWhatsapp = key === "whatsapp";
-                const href = isWhatsapp ? contactInfo.whatsapp : "#";
+                const isFacebook = key === "facebook";
+                const isInstagram = key === "instagram";
+                const href = isWhatsapp 
+                  ? contactInfo.whatsapp 
+                  : isFacebook 
+                  ? contactInfo.facebook 
+                  : isInstagram 
+                  ? contactInfo.instagram 
+                  : "#";
                 return (
                   <a 
                     key={key} 
                     href={href}
-                    target={isWhatsapp ? "_blank" : undefined}
-                    rel={isWhatsapp ? "noopener noreferrer" : undefined}
+                    target={isWhatsapp || isFacebook || isInstagram ? "_blank" : undefined}
+                    rel={isWhatsapp || isFacebook || isInstagram ? "noopener noreferrer" : undefined}
                     className="w-10 h-10 bg-white/10 hover:bg-primary rounded-full flex items-center justify-center transition-colors"
                   >
                     {icon}
