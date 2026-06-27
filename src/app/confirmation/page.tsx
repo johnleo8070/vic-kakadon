@@ -1,14 +1,48 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle, Package, ArrowRight, Copy, Check } from "lucide-react";
+import { trackPurchase } from "@/lib/pixel";
 
 function ConfirmationContent() {
   const searchParams = useSearchParams();
   const orderNumber = searchParams.get("orderNumber");
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!orderNumber) return;
+
+    // Fetch order details to track Purchase event
+    const fetchOrderAndTrack = async () => {
+      try {
+        const res = await fetch(`/api/orders?orderNumber=${encodeURIComponent(orderNumber)}`);
+        const data = await res.json();
+        
+        if (data.success && data.data && data.data.length > 0) {
+          const order = data.data[0];
+          const products = order.order_items || [];
+          
+          trackPurchase(
+            order.order_number,
+            parseFloat(order.total_amount),
+            products.length,
+            products.map((item: any) => ({
+              id: item.product_id?.toString() || item.product_name,
+              name: item.product_name,
+              price: parseFloat(item.price),
+              quantity: item.quantity,
+            }))
+          );
+        }
+      } catch (error) {
+        console.error('Error tracking purchase:', error);
+      }
+    };
+
+    fetchOrderAndTrack();
+  }, [orderNumber]);
 
   const copyOrderId = () => {
     if (!orderNumber) return;

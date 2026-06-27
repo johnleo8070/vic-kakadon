@@ -10,6 +10,7 @@ import { showToast } from "@/components/Toast";
 import { formatPrice } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import ProductStructuredData from "@/components/ProductStructuredData";
+import { trackViewContent, trackAddToCart } from "@/lib/pixel";
 
 function ProductDetailContent() {
   const params = useParams();
@@ -35,6 +36,14 @@ function ProductDetailContent() {
           const colors = data.data.colors || [];
           if (sizes.length > 0) setSelectedSize(sizes[0]);
           if (colors.length > 0) setSelectedColor(colors[0]);
+          
+          // Track ViewContent event
+          trackViewContent(
+            data.data.id.toString(),
+            data.data.name,
+            parseFloat(data.data.price),
+            data.data.category_name
+          );
         }
       } catch (e) {
         console.error(e);
@@ -73,6 +82,15 @@ function ProductDetailContent() {
         color: selectedColor,
       },
     });
+    
+    // Track AddToCart event
+    trackAddToCart(
+      product.id.toString(),
+      product.name,
+      parseFloat(product.price),
+      quantity
+    );
+    
     showToast("success", `${product.name} added to cart!`);
   };
 
