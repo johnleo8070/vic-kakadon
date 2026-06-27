@@ -68,37 +68,52 @@ export async function GET(request: Request) {
     }
 
     // XML format (default)
-    const xmlItems = products?.map((product: any) => {
-      const imageUrl = product.images?.[0] 
-        ? (product.images[0].startsWith('http') ? product.images[0] : `${baseUrl}${product.images[0]}`) 
-        : `${baseUrl}/images/logo.png`;
-      
-      const description = product.description || '';
-      const escapedDescription = description.includes('<') || description.includes('>') || description.includes('&')
-        ? `<![CDATA[${description.replace(/]]>/g, ']]]]><![CDATA[>')}]]>`
-        : escapeXml(description);
-      
-      return `
+    const xmlItems = products?.map((product: any, index: number) => {
+      try {
+        const imageUrl = product.images?.[0] 
+          ? (product.images[0].startsWith('http') ? product.images[0] : `${baseUrl}${product.images[0]}`) 
+          : `${baseUrl}/images/logo.png`;
+        
+        // Simple XML escaping for all fields
+        const safeName = escapeXml(product.name || '');
+        const safeDescription = escapeXml(product.description || '');
+        const safeBrand = escapeXml(brand);
+        const safeCategory = escapeXml(product.categories?.name || 'Fashion & Accessories');
+        const safeSlug = escapeXml(product.slug || '');
+        const safeImageUrl = escapeXml(imageUrl);
+        
+        // Validate price is a number
+        const price = parseFloat(product.price);
+        if (isNaN(price)) {
+          console.error(`Invalid price for product ${product.id}: ${product.price}`);
+          return '';
+        }
+        
+        return `
     <item>
       <g:id>${product.id}</g:id>
-      <g:title>${escapeXml(product.name)}</g:title>
-      <g:description>${escapedDescription}</g:description>
-      <g:link>${baseUrl}/products/${product.slug}</g:link>
-      <g:image_link>${escapeXml(imageUrl)}</g:image_link>
+      <g:title>${safeName}</g:title>
+      <g:description>${safeDescription}</g:description>
+      <g:link>${escapeXml(baseUrl + '/products/' + product.slug)}</g:link>
+      <g:image_link>${safeImageUrl}</g:image_link>
       <g:availability>${(product.stock_quantity || 0) > 0 ? 'in stock' : 'out of stock'}</g:availability>
-      <g:price>${parseFloat(product.price).toFixed(2)} NGN</g:price>
-      <g:brand>${escapeXml(brand)}</g:brand>
+      <g:price>${price.toFixed(2)} NGN</g:price>
+      <g:brand>${safeBrand}</g:brand>
       <g:condition>new</g:condition>
-      <g:product_type>${escapeXml(product.categories?.name || 'Fashion & Accessories')}</g:product_type>
+      <g:product_type>${safeCategory}</g:product_type>
     </item>`;
+      } catch (error) {
+        console.error(`Error processing product ${product.id} at index ${index}:`, error);
+        return '';
+      }
     }).join('') || '';
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
   <channel>
-    <title>K D K Collections Wear Product Catalog</title>
-    <link>${baseUrl}</link>
-    <description>Product catalog for K D K Collections Wear</description>${xmlItems}
+    <title>${escapeXml('K D K Collections Wear Product Catalog')}</title>
+    <link>${escapeXml(baseUrl)}</link>
+    <description>${escapeXml('Product catalog for K D K Collections Wear')}</description>${xmlItems}
   </channel>
 </rss>`;
 
@@ -115,13 +130,48 @@ export async function GET(request: Request) {
   }
 }
 
+function sanitizeText(str: string): string {
+  if (!str) return '';
+  
+  // Convert to string if not already
+  str = String(str);
+  
+  // Remove ALL control characters
+  str = str.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+  
+  // Remove Unicode surrogate pairs and non-characters
+  str = str.replace(/[\uD800-\uDFFF]/g, '');
+  str = str.replace(/[\uFFFE\uFFFF]/g, '');
+  
+  // Remove any other problematic characters
+  str = str.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
+  
+  // Escape CDATA end marker to prevent injection
+  str = str.replace(/]]>/g, ']]]]><![CDATA[>');
+  
+  return str;
+}
+
+function cdataEscape(str: string): string {
+  if (!str) return '';
+  str = String(str);
+  // Escape CDATA end marker to prevent injection
+  str = str.replace(/]]>/g, ']]]]><![CDATA[>');
+  return `<![CDATA[${str}]]>`;
+}
+
 function escapeXml(str: string): string {
   if (!str) return '';
   
-  // Remove control characters (except tab, newline, carriage return)
-  str = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '');
+  // Convert to string if not already
+  str = String(str);
   
-  // Escape XML special characters
+  // Remove only the characters that are definitively invalid in XML 1.0
+  // These are: 0x00-0x08, 0x0B, 0x0C, 0x0E-0x1F, 0x7F, 0xFFFE, 0xFFFF
+  str = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+  str = str.replace(/[\uFFFE\uFFFF]/g, '');
+  
+  // Escape XML special characters (do this LAST)
   return str
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')

@@ -29,13 +29,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '1019230593813850');
+            fbq('init', '1323260239394599');
             fbq('track', 'PageView');
           `}
         </Script>
         <noscript>
           <img height="1" width="1" style={{ display: 'none' }}
-            src="https://www.facebook.com/tr?id=1019230593813850&ev=PageView&noscript=1"
+            src="https://www.facebook.com/tr?id=1323260239394599&ev=PageView&noscript=1"
           />
         </noscript>
       </head>
