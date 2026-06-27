@@ -73,11 +73,16 @@ export async function GET(request: Request) {
         ? (product.images[0].startsWith('http') ? product.images[0] : `${baseUrl}${product.images[0]}`) 
         : `${baseUrl}/images/logo.png`;
       
+      const description = product.description || '';
+      const escapedDescription = description.includes('<') || description.includes('>') || description.includes('&')
+        ? `<![CDATA[${description.replace(/]]>/g, ']]]]><![CDATA[>')}]]>`
+        : escapeXml(description);
+      
       return `
     <item>
       <g:id>${product.id}</g:id>
       <g:title>${escapeXml(product.name)}</g:title>
-      <g:description>${escapeXml(product.description || '')}</g:description>
+      <g:description>${escapedDescription}</g:description>
       <g:link>${baseUrl}/products/${product.slug}</g:link>
       <g:image_link>${escapeXml(imageUrl)}</g:image_link>
       <g:availability>${(product.stock_quantity || 0) > 0 ? 'in stock' : 'out of stock'}</g:availability>
@@ -111,6 +116,12 @@ export async function GET(request: Request) {
 }
 
 function escapeXml(str: string): string {
+  if (!str) return '';
+  
+  // Remove control characters (except tab, newline, carriage return)
+  str = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '');
+  
+  // Escape XML special characters
   return str
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
